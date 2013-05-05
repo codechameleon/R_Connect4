@@ -14,7 +14,7 @@ class C4Model
   # Places player token
   def place_token(column)
 
-   unless column > @board[0].length-1
+   unless column > @board[0].length-1 || column < 0
       @board.each_index do |i|
          if @board.reverse[i][column].nil?
            @board.reverse[i][column] = @current_player
@@ -27,6 +27,13 @@ class C4Model
       end
      nil
     end
+  end
+
+  def check_tie
+	  if @board[0].include?(nil) == false
+	    raise Interrupt
+	end
+	nil
   end
 
   def who_won
@@ -48,38 +55,64 @@ class C4Model
       start = @last_col - @last_row
       # If we need to check the top half or middle of the board
       if start >= 0
+	if (@board[0].length - @last_col) < (@board.length - @last_row)
+        (start .. @board[0].length-1).each_with_index do |i, index|
+          array.push(@board[index][i])
+          x_in_a_row(array)
+	  end
+	else
         (start .. @board.length-1).each_with_index do |i, index|
           array.push(@board[index][i])
           x_in_a_row(array)
+	  end
         end
 
       # If we need to check the bottom half of the board
       else
         start = @last_row - @last_col
-        (start .. @board[0].length-1).each_with_index do |i, index|
+	if (@board[0].length - @last_col) < (@board.length - @last_row)
+	 (start .. @board[0].length-1).each_with_index do |i, index|
           array.push(@board[i][index])
           x_in_a_row(array)
+          end
+	else
+	 (start .. @board.length-1).each_with_index do |i, index|
+          array.push(@board[i][index])
+          x_in_a_row(array)
+	  end
         end
       end
 
       # Checks the backward diagonal of the last move (/)
       array.clear
-      start = (@last_row) - ((@board[0].length-1) - @last_col)
-
-      # we know we need to check the bottom or half of the board
-      if start >= 0
+      
+      if @last_col > ((@board.length-1) - @last_row)
+	start = @last_col - ((@board.length-1) - @last_row)
+	if @last_row > ((@board[0].length-1)-@last_col)
         (start .. @board[0].length-1).each_with_index do |i,index|
           array.push(@board[(@board.length-1)-index][i])
           x_in_a_row(array)
         end
-
-      # we know we need to check the upper half of the board
-      else
-        start = @last_col - @last_row
-        (0 .. start).each_with_index do |i,index|
-          array.push(@board[index][i])
+	else
+        (start .. (@last_row + @last_col)).each_with_index do |i,index|
+          array.push(@board[(@board.length-1)-index][i])
           x_in_a_row(array)
         end
+	end
+      else
+	if @last_row > ((@board[0].length - 1) - @last_col)
+	  start = @board[0].length - 1
+           (0 .. start).each_with_index do |i,index|
+             array.push(@board[@last_row + @last_col - index][i])
+             x_in_a_row(array)
+         end
+	else
+	  start = @last_row + @last_col
+           (0 .. start).each_with_index do |i,index|
+             array.push(@board[@last_row + @last_col - index][i])
+             x_in_a_row(array)
+         end
+	end
       end
 
       nil
@@ -97,7 +130,6 @@ class C4Model
         # Check the part of the array by getting the unique elements
         check = row[i,@win_length].uniq
         unless check.first.nil? or check.count > 1
-          puts check.first
           throw :match, check.first
         end
       end

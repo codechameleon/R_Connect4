@@ -30,7 +30,6 @@ class C4Driver
     winner = nil
     until winner do
           turn = nil
-
       # Take turn
       until turn do
         begin
@@ -55,7 +54,9 @@ class C4Driver
            raise InvalidInput
          end
          game.print_board
+
          winner = game.who_won
+	# game.check_tie
          turn = 1
          player = (1 + player) % 2
         rescue InvalidInput
@@ -64,8 +65,12 @@ class C4Driver
         end
       end
     end
-  print "Player ", player, " won!"
+  print "Player ",(1 - player) % 2, " won!"
   puts ""
+
   end
+	#rescue Interrupt
+	#puts "It was a tie game."
+	#end
   puts "Thanks for playing"
 end
